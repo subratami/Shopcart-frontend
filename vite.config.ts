@@ -15,10 +15,11 @@ server: {
   port: Number(process.env.PORT) || 3000,
   allowedHosts,
   proxy: {
-    '/search': {
-      target: 'https://shopping-site-api-z8gg.onrender.com',
-      changeOrigin: true,
-      secure: false,
+    "/api": {
+        target: "http://127.0.0.1:8000",
+        changeOrigin: true,
+        secure: false,
+        rewrite: path => path.replace(/^\/api/, ""),
     },
   },
 },
