@@ -8,15 +8,15 @@ import Signup from "./component/signup";
 import Dashboard from './component/dashboard';
 import ProtectedRoute from './utils/ProtectedRoute';
 import PublicRoute from './utils/PublicRoute';
-import { useState,useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import ProductList from './component/productlist';
 import   { CartProvider } from "./component/CartContext";
-import CartPage from './component/cart'
+import CartPage from './component/cart';
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 function App() {
   const [searchQuery, setSearchQuery] = useState("");
-   const [toastPosition, setToastPosition] = useState<"top-right" | "bottom-center">("top-right");
+    const [toastPosition, setToastPosition] = useState<"top-right" | "bottom-center">("top-right");
 
   useEffect(() => {
     const handleResize = () => {
@@ -37,17 +37,17 @@ function App() {
     <Header onSearch={setSearchQuery}/>
      <Routes>    
           <Route path="/" element={<Homepage />} />
+          <Route path="/cart" element={<CartPage />} />
           <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
           <Route path="/signup" element={<PublicRoute><Signup /></PublicRoute>} />
           <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
           <Route path="/search" element={<ProductList searchQuery={searchQuery} />} />
-          <Route path="/cart" element={<CartPage />} />
           <Route path="*" element={<h1>Page Not Found</h1>} />
     </Routes>
     <Footer />
     </Router>
 </CartProvider>
-<ToastContainer position={toastPosition} autoClose={5000} />
+<ToastContainer position={toastPosition} autoClose={2000} />
 </>
   );
 }

@@ -3,3 +3,8 @@ font-family: Arial, sans-serif;
 margin: 0px;
 border: 0px;
 }
+@media screen and (max-width:850px){
+    ToastContainer {
+       display: none;
+    }
+}
