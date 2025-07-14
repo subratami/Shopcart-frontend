@@ -20,7 +20,7 @@ export const authFetch = async (
   }
 
   // Try to refresh the token
-  const refreshResponse = await fetch('https://shopping-site-api-z8gg.onrender.com/refresh', {
+  const refreshResponse = await fetch('api/token/refresh', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ refresh_token: refreshToken })
@@ -42,7 +42,8 @@ export const authFetch = async (
     ...init,
     headers: {
       ...headers,
-      Authorization: `Bearer ${newTokens.access_token}`
+      Authorization: `Bearer ${newTokens.access_token}`,
+      "Content-Type": "application/json"
     }
   });
 };

@@ -1,3 +1,4 @@
+// src/utils/logoutUser.ts
 import { authFetch } from "./authFetch";
 import { toast } from "react-toastify";
 
@@ -6,18 +7,17 @@ export const logoutUser = async (): Promise<void> => {
 
   try {
     if (token) {
-      await authFetch("https://shopping-site-api-z8gg.onrender.com/logout", {
+      await authFetch("http://127.0.0.1:8000/logout", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${token}`,
         },
       });
-      }
-    toast.success("Logged out successfully!");
+    }
+    
   } catch (err) {
     console.error("Logout request failed:", err);
-    toast.error("Logged out reduest failed!");
     // Silently fail if server is down or token is bad—client will still log out
   }
 
@@ -26,7 +26,7 @@ export const logoutUser = async (): Promise<void> => {
   localStorage.removeItem("refresh_token");
   localStorage.removeItem("isLoggedIn");
   localStorage.removeItem("userName");
-  
+  toast.success("Logged out successfully");
   // Optional: reload or redirect
   window.location.href="/";
 };
