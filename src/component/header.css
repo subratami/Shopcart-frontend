@@ -43,6 +43,7 @@ header .topright{
 nav{
     width: 100%;
     height: 3rem;
+    background-color: white;
    box-shadow: rgba(16, 17, 17, 0.4) 0px 10px 10px -10px;
     display: flex;
     justify-content: space-between;
@@ -245,10 +246,11 @@ padding-top: 10px;
 
 .second ul li{
 list-style:none;
+background-color: none;
 }
 .second ul li .hyperlink{
   padding: 0%;
-  background-color: white;
+  background-color: none;
 text-decoration:none;
 font-size:15px;
 color: black;
@@ -258,7 +260,7 @@ color: black;
   width: 145px;
   height: 4px;
   border-radius: 10px;
-  background-color: white;
+  background-color: none;
   /*position: absolute;
   left: 185px;*/
   overflow: hidden;
@@ -290,7 +292,7 @@ color: black;
   width: 165px;
   height: 4px;
   border-radius: 10px;
-  background-color: white;
+  background-color: none;
   overflow: hidden;
 
 }
@@ -320,7 +322,7 @@ color: black;
   width: 139px;
   height: 4px;
   border-radius: 10px;
-  background-color: white;
+  background-color: none;
   overflow: hidden;
 
 }
@@ -351,7 +353,7 @@ color: black;
   width: 110px;
   height: 4px;
   border-radius: 10px;
-  background-color: white;
+  background-color: none;
   overflow: hidden;
 
 }
@@ -380,7 +382,7 @@ color: black;
   width: 112px;
   height: 4px;
   border-radius: 10px;
-  background-color: white;
+  background-color: none;
   /*position: absolute;
   left: 662px;*/
   overflow: hidden;
@@ -502,7 +504,9 @@ font-weight: normal;
   padding-left: 40px;
   font-size: 15px;
  }
- 
+ .smartphonelist ul li{
+  background-color: none;
+ }
 .smartphonelist ul li a{
  text-decoration: none; 
  color: gray;
@@ -799,7 +803,7 @@ font-weight: normal;
     height: 3rem;
   }
   nav .searchbar{
-    width: 30%;
+    width: 20%;
   }
 }
 
@@ -817,14 +821,13 @@ nav{
     align-items: center;
     background-color: rgb(184, 183, 183);
     box-shadow: rgba(42, 0, 141, 0.993);
-    z-index: 1;
+    z-index: 999;
   }
   .logo{
     width: 85%;
   }
   nav .searchbar{
     width: 70%;
-    height: 30px;
     margin-bottom: 10px;
     position: relative;
   }
@@ -851,8 +854,8 @@ nav{
 }
 .second .menubar{
   display: block;
-  width: 35px;
-  height: 35px;
+  width: 38px;
+  height: 38px;
 }
 .second .second-list{
   display: none;
@@ -952,9 +955,6 @@ nav .list{
   .list .Wishlist{
     display: none;
   }
-  .second .toogle-btn{
-    padding: 2px;
-  }
   .second .side-menu{
     top: 0%;
   }
@@ -963,11 +963,8 @@ nav .list{
   }
 .menu-list .User{
   display: flex;
-  justify-content: space-between; 
-}
-.menu-list .User a{
-  float: right;
-  position: sticky;
+  justify-content: space-between;
+  align-content: last baseline;
 }
 
   .dropdown-content{
@@ -978,8 +975,8 @@ nav .list{
     height: 10px;
   }
   .second .menubar{
-    width: 30px;
-    height: 30px;
+    width: 32px;
+    height: 32px;
   }
   .second .side-menu{
     width: 100%;
@@ -988,4 +985,54 @@ nav .list{
   .second .menu-list{
     height: max-content;
   }
+}
+
+.header-welcome {
+  padding-top: 20px;
+}
+.header-logout-btn {
+  width: 100%;
+  height: 40px;
+  background: gray;
+  border: none;
+  color: purple;
+  cursor: pointer;
+  font-weight: bold;
+  padding-top: 11px;
+  padding-left: 15px;
+}
+.header-cart-count {
+  color: purple;
+  font-weight: bold;
+}
+.header-closebtn {
+  padding: 5% 48%;
+  background-color: rgb(142, 122, 122);
+}
+.header-closeimg {
+  width: 1.5rem;
+}
+.header-user-li {
+  padding: 1rem;
+}
+.header-logout-btn-side {
+  width: 30%;
+  height: 40px;
+  background: gray;
+  border: none;
+  color: purple;
+  cursor: pointer;
+  font-weight: bold;
+  padding-top: 11px;
+  padding-left: 15px;
+}
+.header-logout-btn-hide {
+  display: none;
+}
+.header-account-link {
+  text-decoration: none;
+  color: black;
+}
+.header-account-img {
+  width: 1.5rem;
 }

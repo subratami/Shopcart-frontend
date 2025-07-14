@@ -41,6 +41,9 @@
 .auth-form p{
   color: black;
 }
+.login-signup-p {
+  padding: 10px;
+}
 /*.auth-form p a{
   float: right;
 }*/

@@ -1,198 +1,297 @@
-import { createContext, useContext, useState, useEffect,type ReactNode } from "react";
+import { createContext, useContext, useEffect, useState,type ReactNode } from "react";
 import { authFetch } from "../utils/authFetch";
 
-// --- Types ---
-export interface CartItem {
-  _id: string;
-  Brand?: string;
-  Model?: string;
-  Color?: string;
-  Memory?: string;
-  Storage?: string;
-  "Selling Price"?:number;
+// --- Inline Types ---
+interface CartItem {
+  product_id: string;
+  brand?: string;
+  model?: string;
+  color?: string;
+  memory?: string;
+  storage?: string;
+  price: number;
+  image: string;
+  description: string;
   quantity: number;
-  [key: string]: any; // For additional product fields
+  subtotal: number;
+}
+
+interface CartData {
+  items: CartItem[]
+  coupon: string | null;
+  discount_total: number;
+  final_total: number;
 }
 
 interface CartContextType {
-  cart: CartItem[];
+  cart: CartData;
   loading: boolean;
-  error: string | null;
-  addToCart: (productId: string, quantity?: number) => Promise<void>;
-  updateCartItem: (productId: string, quantity: number) => Promise<void>;
-  removeFromCart: (productId: string) => Promise<void>;
-  clearCart: () => Promise<void>;
-  checkout: () => Promise<void>;
-  refreshCart: () => Promise<void>;
+  fetchCart: () => Promise<void>;
+  addToCart: (product_id: string, quantity?: number, productInfo?: { brand: string; model: string; color: string; memory: string; storage: string; price: number; image?: string; description?: string }) => Promise<void>;
+  updateCartItem: (product_id: string, quantity: number) => Promise<void>;
+  removeFromCart: (product_id: string) => Promise<void>;
+  applyCoupon: (code: string) => Promise<void>;
+  checkout: () => Promise<any>;
 }
 
-// --- Context ---
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
-export const useCart = () => {
+export function useCart() {
   const ctx = useContext(CartContext);
   if (!ctx) throw new Error("useCart must be used within a CartProvider");
   return ctx;
-};
-
-// --- Provider ---
-export const CartProvider = ({ children }: { children: ReactNode }) => {
-  const [cart, setCart] = useState<CartItem[]>([]);
+}
+export function CartProvider({ children }: { children: ReactNode }) {
+  const [cart, setCart] = useState<CartData>({
+    items: [],
+    coupon: null,
+    discount_total: 0,
+    final_total: 0,
+  });
   const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
-
-  // Adjust this if your backend is hosted elsewhere
-  const API_BASE = "https://shopping-site-api-z8gg.onrender.com"; 
-
-  // --- Fetch Cart ---
-  const refreshCart = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await authFetch(`${API_BASE}/cart`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-        },
-      });
-      if (res.ok) {
-        const data: CartItem[] = await res.json();
-        setCart(data);
-      } else if (res.status === 401) {
-        setError("Please log in to view your cart.");
-        setCart([]);
-      } else {
-        setError("Failed to load cart.");
-      }
-    } catch (err) {
-      setError("Network error while loading cart.");
-    }
-    setLoading(false);
-  };
+  const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem("access_token"));
 
   useEffect(() => {
-    refreshCart();
-    // Optionally, add a dependency for access_token changes
+    const checkLogin = () => setIsLoggedIn(!!localStorage.getItem("access_token"));
+    window.addEventListener("storage", checkLogin);
+    return () => window.removeEventListener("storage", checkLogin);
   }, []);
 
-  // --- Add to Cart ---
-  const addToCart = async (productId: string, quantity: number = 1) => {
-    setError(null);
-    const res = await authFetch(`${API_BASE}/cart/add`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",},
-      body: JSON.stringify({ product_id: productId, quantity }),
-    });
-    if (res.ok) {
-      await refreshCart();
-    } else if (res.status === 401) {
-      setError("Please log in to add items to your cart.");
-    } else if (res.status === 404) {
-      setError("Product not found.");
-    } else {
-      setError("Failed to add item to cart.");
-    }
-  };
+  useEffect(() => {
+    fetchCart();
+    // eslint-disable-next-line
+  }, [isLoggedIn]);
 
-  // --- Update Cart Item ---
-  const updateCartItem = async (productId: string, quantity: number) => {
-    setError(null);
-    if (quantity < 1){
-      setError("Quantity must be at least 1.");
-      return;
+  // 🔄 Auto-persist guest cart
+  useEffect(() => {
+    if (!isLoggedIn) {
+      localStorage.setItem("guest_cart", JSON.stringify(cart));
     }
-    const res = await authFetch(`${API_BASE}/cart/add`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-      },
-      body: JSON.stringify({ product_id: productId, quantity }),
-    });
-    if (res.ok) {
-      await refreshCart();
-    } else if (res.status === 401) {
-      setError("Please log in to update your cart.");
-    }else if (res.status === 404) {
-    setError("Product not found.");
-    } else {
-      setError("Failed to update cart item.");
-    }
-  };
+  }, [cart, isLoggedIn]);
 
-  // --- Remove from Cart ---
-  const removeFromCart = async (productId: string) => {
-    setError(null);
-    const res = await authFetch(`${API_BASE}/cart/remove`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-      },
-      body: JSON.stringify({ product_id: productId }),
-    });
-    if (res.ok) {
-      await refreshCart();
-    } else if (res.status === 401) {
-      setError("Please log in to remove items.");
-    } else {
-      setError("Failed to remove item from cart.");
+  // 🛍 Fetch cart based on auth state
+  async function fetchCart() {
+    setLoading(true);
+    try {
+      if (isLoggedIn) {
+        const res = await authFetch("/api/cart");
+        if (!res.ok) throw new Error("Failed to fetch cart");
+        const data = await res.json();
+        console.log("🛒 Cart response:", data);
+        setCart(data);
+      } else {
+        const guest = localStorage.getItem("guest_cart");
+        if (guest) {
+          setCart(JSON.parse(guest));
+        }
+      }
+    } catch {
+      setCart({ items: [], coupon: null, discount_total: 0, final_total: 0 });
     }
-  };
+    setLoading(false);
+  }
 
-  // --- Clear Cart ---
-  const clearCart = async () => {
-    setError(null);
-    const res = await fetch(`${API_BASE}/cart/clear`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-      },
-    });
-    if (res.ok) {
-      setCart([]);
-    } else if (res.status === 401) {
-      setError("Please log in to clear your cart.");
+  async function addToCart(
+    product_id: string,
+    quantity: number = 1,
+    productInfo?: { brand: string; model: string; color: string; memory: string; storage: string; price: number; image?: string; description?: string }
+  ) {
+    if (isLoggedIn) {
+      await authFetch("/api/cart/add", {
+        method: "POST",
+        body: JSON.stringify({ product_id, quantity }),
+      });
+      await fetchCart();
     } else {
-      setError("Failed to clear cart.");
-    }
-  };
+      const existing = [...cart.items];
+      const index = existing.findIndex((i) => i.product_id === product_id);
+      if (index !== -1) {
+        existing[index].quantity += quantity;
+        existing[index].subtotal = existing[index].quantity * existing[index].price;
+      } else {
+        existing.push({
+          product_id,
+          brand: productInfo?.brand || "Unknown",
+          model: productInfo?.model || "Unknown",
+          color: productInfo?.color || "unknown",
+          memory: productInfo?.memory || "unknown",
+          storage: productInfo?.storage || "unknown",
+          price: productInfo?.price || 0,
+          image: productInfo?.image || "",
+          description: productInfo?.description || "",
+          quantity,
+          subtotal: (productInfo?.price || 0) * quantity,
+        });
+      }
 
-  // --- Checkout ---
-  const checkout = async () => {
-    setError(null);
-    const res = await fetch(`${API_BASE}/cart/checkout`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-      },
-    });
-    if (res.ok) {
-      setCart([]);
-    } else if (res.status === 401) {
-      setError("Please log in to checkout.");
-    } else if (res.status === 400) {
-      setError("Your cart is empty.");
-    } else {
-      setError("Checkout failed.");
+      const final_total = existing.reduce((t, i) => t + i.subtotal, 0);
+      const updatedCart = {
+        ...cart,
+        items: existing,
+        final_total,
+        discount_total: 0,
+      };
+      setCart(updatedCart);
+    localStorage.setItem("guest_cart", JSON.stringify(updatedCart));
+  
     }
-  };
+  }
+
+  async function updateCartItem(product_id: string, quantity: number) {
+    if (isLoggedIn) {
+      await authFetch("/api/cart/update", {
+        method: "PUT",
+        body: JSON.stringify({ product_id, quantity }),
+      });
+      await fetchCart();
+    } else {
+      const updated = cart.items.map((item) =>
+        item.product_id === product_id
+          ? { ...item, quantity, subtotal: item.price * quantity }
+          : item
+      );
+      const final_total = updated.reduce((t, i) => t + i.subtotal, 0);
+      setCart({
+        ...cart,
+        items: updated,
+        final_total,
+        discount_total: 0,
+      });
+    }
+  }
+
+  async function removeFromCart(product_id: string) {
+    if (isLoggedIn) {
+      await authFetch("/api/cart/remove", {
+        method: "DELETE",
+        body: JSON.stringify({ product_id }),
+      });
+      await fetchCart();
+    } else {
+      const updated = cart.items.filter((item) => item.product_id !== product_id);
+      const final_total = updated.reduce((t, i) => t + i.subtotal, 0);
+      setCart({
+        ...cart,
+        items: updated,
+        final_total,
+        discount_total: 0,
+      });
+    }
+  }
+
+  async function applyCoupon(code: string) {
+    if (!isLoggedIn) return;
+    await authFetch("/api/cart/coupon", {
+      method: "POST",
+      body: JSON.stringify({ code }),
+    });
+    await fetchCart();
+  }
+
+  async function checkout() {
+    if (!isLoggedIn) return { message: "Please log in to checkout." };
+    const res = await authFetch("/api/checkout", { method: "POST" });
+    await fetchCart();
+    return res.json();
+  }
 
   return (
     <CartContext.Provider
       value={{
         cart,
         loading,
-        error,
+        fetchCart,
         addToCart,
         updateCartItem,
         removeFromCart,
-        clearCart,
+        applyCoupon,
         checkout,
-        refreshCart,
       }}
     >
       {children}
     </CartContext.Provider>
   );
-};
+}
+
+{/*export function CartProvider({ children }: { children: ReactNode }) {
+  const [cart, setCart] = useState<CartData>({
+    items: [],
+    coupon: null,
+    discount_total: 0,
+    final_total: 0,
+  });
+  const [loading, setLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    fetchCart();
+    // eslint-disable-next-line
+  }, []);
+
+  async function fetchCart() {
+    setLoading(true);
+    try {
+      const res = await authFetch("/api/cart");
+      if (!res.ok) throw new Error("Failed to fetch cart");
+      const data = await res.json();
+      setCart(data);
+    } catch {
+      setCart({ items: [], coupon: null, discount_total: 0, final_total: 0 });
+    }
+    setLoading(false);
+  }
+
+  async function addToCart(product_id: string, quantity: number = 1) {
+    await authFetch("/api/cart/add", {
+      method: "POST",
+      body: JSON.stringify({ product_id, quantity }),
+    });
+    await fetchCart();
+  }
+
+  async function updateCartItem(product_id: string, quantity: number) {
+    await authFetch("/api/cart/update", {
+      method: "PUT",
+      body: JSON.stringify({ product_id, quantity }),
+    });
+    await fetchCart();
+  }
+
+  async function removeFromCart(product_id: string) {
+    await authFetch("/api/cart/remove", {
+      method: "DELETE",
+      body: JSON.stringify({ product_id }),
+    });
+    await fetchCart();
+  }
+
+  async function applyCoupon(code: string) {
+    await authFetch("/api/cart/coupon", {
+      method: "POST",
+      body: JSON.stringify({ code }),
+    });
+    await fetchCart();
+  }
+
+  async function checkout() {
+    const res = await authFetch("/api/checkout", { method: "POST" });
+    await fetchCart();
+    return res.json();
+  }
+console.log("🧾 Cart from context:", cart);
+  return (
+    <CartContext.Provider
+      value={{
+        cart,
+        loading,
+        fetchCart,
+        addToCart,
+        updateCartItem,
+        removeFromCart,
+        applyCoupon,
+        checkout,
+      }}
+    >
+      {children}
+    </CartContext.Provider>
+  );
+} */}

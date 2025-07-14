@@ -1,58 +1,97 @@
-.banner{
+.homepage{
+  background-color: rgba(212, 217, 220, 0.833);
     top: 50%;
     min-height: 100vh;
 }
-.banner .banner-img{
+.homepage .banner-img{
   display: flex;
   padding: 2% 10% 2% 10%;
 width: 80%;
 height: 60vh;
 }
-.banner .banner-Adv{
+.homepage .banner-Adv{
   display: flex;
   padding: 2% 10% 2% 10%;
   width: 80%;
   height: 18vh;
 }
+.categories{
+  display: flex;
+  flex-direction: column;
+  padding: 0% 10% 0% 10%;
+  gap: 10px;
+}
+.categories span{
+  display: flex;
+  font: 1.5rem 'Arial', sans-serif;
+}
+.categories-list{
+  display:flex;
+  flex-direction: row;
+  justify-content: space-between;
+  list-style: none;
+  width: 100%;
+  padding: 0;
+}
+.categories-list li{
+  width: 24%;
+}
+.categories-list li img{
+  width: 100%;
+  height: 50%;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.categories-list li img:hover{
+  transform: scale(1.05);
+  transition: all 0.3s ease-in-out;
+  box-shadow: 0 2px 5px rgba(10, 10, 10, 0.4);
+}
 @media  screen and (max-width: 900px) {
-  .banner .banner-img{
+  .homepage .banner-img{
     height: 50vh;
   }
-    .banner .banner-Adv{
+    .homepage .banner-Adv{
     height: 8vh;
   }
 }
 @media  screen and (max-width: 850px) {
-.banner{
+.homepage{
   position: relative;
   top: 6%; 
   z-index: -1;
 }
 }
 @media  screen and (max-width: 750px) {
-  .banner .banner-img{
+  .homepage .banner-img{
     height: 40vh;
   }
 }
 @media  screen and (max-width: 650px) {
-  .banner{
+  .homepage{
   position: relative;
   top: 8%; 
+}
+.categories span{
+  font-size: 1rem;
 }
 }
 
 @media  screen and (max-width: 450px) {
-  .banner .banner-img{
+  .homepage .banner-img{
     width: 96%;
-    height: 10vh;
+    height: 14vh;
     padding-left: 2%;
   padding-right: 2%;
   }
-  .banner .banner-Adv{
+  .homepage .banner-Adv{
   width: 96%;
   padding-left: 2%;
   padding-right: 2%;
     height: 7vh;
+  }
+  .categories{
+    padding: 2%;
   }
   
 }

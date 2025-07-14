@@ -13,6 +13,9 @@ import { debounce } from "lodash";
 import menubar from "./menu-bar.png";
 import close from "./close.png"
 import { logoutUser } from "../utils/logout.ts";
+
+//import Homepage from './homepage';
+//import Login from "./login";
 import './header.css';
 
 interface HeaderProps {
@@ -56,11 +59,25 @@ function Header({ onSearch }: HeaderProps) {
     const toogleInnerSubmenu = (submenu: string) => {
       setActiveSubMenu(activeSubMenu === submenu ? null : submenu);
     };
+    // Hide dropdown-component on any click (inside or outside) on small screens
     const handleLinkClick = () => {
-  setIsOpen(false); // close side menu
-  setActiveMenu(null); // optionally close submenu
-  setActiveSubMenu(null); // optionally close inner submenu
-};
+      setIsOpen(false); // close side menu
+      setActiveMenu(null); // close submenu
+      setActiveSubMenu(null); // close inner submenu
+    };
+
+    // Hide dropdown-component when clicking outside or any link/button inside (on small screens)
+   /* useEffect(() => {
+      if (window.innerWidth > 900) return;
+      const handleAnyClick = () => {
+        // Only run on small screens
+        setIsOpen(false);
+        setActiveMenu(null);
+        setActiveSubMenu(null);
+      };
+      document.addEventListener("click", handleAnyClick);
+      return () => document.removeEventListener("click", handleAnyClick);
+    }, []);*/
     return (
         <>
         <header>
@@ -88,15 +105,15 @@ function Header({ onSearch }: HeaderProps) {
 {/*
 <p className="para1"><small>Signup/Login for best experience</small></p>
 */}
-<span style={{paddingTop: "20px"}}>Welcome, {userName || "User"}!</span>
+<span className="header-welcome">Welcome, {userName || "User"}!</span>
 {localStorage.getItem("isLoggedIn") === "true" ? (
   <div className="button">
     <button
-      className="btnlink"
+      className="btnlink header-logout-btn"
       onClick={async () => {
       logoutUser();
       }}
-      style={{ width: "100%", height: "40px", background: "gray", border: "none", color: "purple", cursor: "pointer", fontWeight: "bold", paddingTop: "11px", paddingLeft: "15px" }}>
+    >
       LOGOUT
     </button>
   </div>
@@ -104,19 +121,19 @@ function Header({ onSearch }: HeaderProps) {
   <div className="dropdtn">
     <div className="button">
       <div className="btnlink">
-        <Link to="/signup">SIGNUP </Link>
+        <Link to="/signup" onClick={handleLinkClick} >SIGNUP </Link>
       </div>
     </div>
     <span>Or</span>
     <div className="button">
       <div className="btnlink">
-        <Link to="./login">&nbsp;LOGIN</Link>
+        <Link to="./login" onClick={handleLinkClick}>&nbsp;LOGIN</Link>
       </div>
     </div>
   </div>
 )}
 <div className="droplink">
-  <Link className="hlink" to="/cart">Cart &nbsp;<span className="cart-count" style={{ color:"purple", fontWeight:'bold'}}>{cart.length}</span></Link>
+  <Link className="hlink" to="/cart">Cart &nbsp;<span className="cart-count header-cart-count">{cart.items?.length ?? 0}</span></Link>
   <a className="hlink" href="#">Wishlist</a>
   <a className="hlink" href="#">eGift Cards</a>
   <a className="hlink" href="#">Find A Store</a>
@@ -126,7 +143,7 @@ function Header({ onSearch }: HeaderProps) {
 </div>
   </div></li>
 <li className="Wishlist"> <a href="#"><img src={wishlist} alt="not_load"/> Wishlist </a> </li>
-<li className="Shoppingbag"> <Link to="/cart"> <img src={shoppingBag} alt="not_load"/>Cart<span className="cart-count">{cart.length}</span></Link> </li>
+<li className="Shoppingbag"> <Link to="/cart"> <img src={shoppingBag} alt="not_load"/>Cart<span className="cart-count">{cart.items?.length ?? 0}</span></Link> </li>
 </ul>
 </nav>
 <div className="second">
@@ -134,29 +151,29 @@ function Header({ onSearch }: HeaderProps) {
  <img src={menubar} className="menubar" alt="not load"/>
  </button>
  <div className={`side-menu ${isOpen ? "open" : ""}`}>
-  <button className="closebtn" onClick={handleLinkClick} style={{padding: '5% 48%', backgroundColor: "rgb(142 122 122)"}}> <img src={close} alt="close icon" style={{width: "1.5rem"}}/> </button>
+  <button className="closebtn header-closebtn" onClick={handleLinkClick}> <img src={close} alt="close icon" className="header-closeimg"/> </button>
 <ul className="menu-list">
  {/* side Menu */}
- <li className="User" style={{ padding:"1rem", textAlignLast: "end"}}>
+ <li className="User header-user-li" style={{ padding:"1rem", textAlignLast: "end"}}>
   {localStorage.getItem("isLoggedIn") === "true" ? (
   <button
-      className="btnlink"
+      className="btnlink header-logout-btn-side"
       onClick={async () => {
       logoutUser();
       handleLinkClick();
       }}
-      style={{width: "30%", height: "40px", background: "gray", border: "none", color: "purple", cursor: "pointer", fontWeight: "bold", paddingTop: "11px", paddingLeft: "15px" }}>
+    >
       LOGOUT
     </button>
 ): (<button
-      className="btnlink"
+      className="btnlink header-logout-btn-hide"
       onClick={async () => {
       logoutUser();
       }}
-      style={{ display: "none" }}>
+    >
       LOGOUT
     </button>)}
-    <Link to="/login" onClick={handleLinkClick} style={{textDecoration:"NONE", color: "black"}}> Your Account <img src={person} alt="not support" style={{width:"1.5rem"}}/></Link></li>
+  <Link to="/login" onClick={handleLinkClick} className="header-account-link"> Your Account <img src={person} alt="not support" className="header-account-img"/></Link></li>
   <li>
    <button className="menu-item" onClick={() => toogleSubmenu("electronics")}>
     Consumer Electronics {activeMenu === "electronics" ? "▲" : "▼"}
@@ -168,17 +185,18 @@ function Header({ onSearch }: HeaderProps) {
      Smartphones {activeSubMenu === "smartphones" ? "▲" : "▼"}
     </button>
     {activeSubMenu === "smartphones" && (
-   <ul>
-  <li><Link to={`/search?brand=Apple`} onClick={handleLinkClick}>Apple</Link></li>
-  <li><Link to={`/search?brand=Samsung`} onClick={handleLinkClick}>Samsung</Link></li>
-  <li><Link to={`/search?brand=Xiaomi`} onClick={handleLinkClick}>Xiaomi</Link></li>
-  <li><Link to={`/search?brand=Oppo`} onClick={handleLinkClick}>Oppo</Link></li>
-  <li><Link to={`/search?brand=Vivo`} onClick={handleLinkClick}>Vivo</Link></li>
-  <li><Link to={`/search?brand=Realme`} onClick={handleLinkClick}>Realme</Link></li>
-  <li><Link to={`/search?brand=Oneplus`} onClick={handleLinkClick}>Oneplus</Link></li>
-  <li><Link to={`/search?brand=Honor`} onClick={handleLinkClick}>Honor</Link></li>
-  <li><Link to={`/search?brand=Iqoo`} onClick={handleLinkClick}>Iqoo</Link></li>
-</ul>
+   <ul className="inner-submenu">
+        <li><a href="#"> Apple</a></li>
+        <li> <a href="#">Samsung</a></li>
+        <li> <a href="#">Xiaomi</a></li>
+        <li> <a href="#">Oppo</a></li>
+        <li> <a href="#">Vivo</a></li>
+        <li> <a href="#">Oppo</a></li>
+        <li> <a href="#">Realme</a></li>
+        <li> <a href="#">Oneplus</a></li>
+        <li> <a href="#">Honor</a></li>
+        <li> <a href="#">Iqoo</a></li>
+    </ul>
     )}
     </li>
     <li>
@@ -342,26 +360,26 @@ function Header({ onSearch }: HeaderProps) {
     <div className="Smartphone"> <a href="#">Smartphones<span className="smartphone"><b>&gt;</b></span></a>
       <div className="smartphonelist"><p> Smartphones Brands</p>
         <ul>
-  <li><Link to={`/search?brand=Apple`} onClick={handleLinkClick}>Apple</Link></li>
-  <li><Link to={`/search?brand=Samsung`} onClick={handleLinkClick}>Samsung</Link></li>
-  <li><Link to={`/search?brand=Xiaomi`} onClick={handleLinkClick}>Xiaomi</Link></li>
-  <li><Link to={`/search?brand=Oppo`} onClick={handleLinkClick}>Oppo</Link></li>
-  <li><Link to={`/search?brand=Vivo`} onClick={handleLinkClick}>Vivo</Link></li>
-  <li><Link to={`/search?brand=Realme`} onClick={handleLinkClick}>Realme</Link></li>
-  <li><Link to={`/search?brand=Oneplus`} onClick={handleLinkClick}>Oneplus</Link></li>
-  <li><Link to={`/search?brand=Honor`} onClick={handleLinkClick}>Honor</Link></li>
-  <li><Link to={`/search?brand=Iqoo`} onClick={handleLinkClick}>Iqoo</Link></li>
-</ul></div></div>
+          <li><Link to={`/search?brand=Apple`} onClick={handleLinkClick}> Apple</Link></li>
+          <li><Link to={`/search?brand=Samsung`} onClick={handleLinkClick}> Samsung</Link></li>
+          <li><Link to={`/search?brand=Xiaomi`} onClick={handleLinkClick}> Xiaomi</Link></li>
+          <li><Link to={`/search?brand=Oppo`} onClick={handleLinkClick}> Oppo</Link></li>
+          <li><Link to={`/search?brand=Vivo`} onClick={handleLinkClick}> Vivo</Link></li>
+          <li><Link to={`/search?brand=Realme`} onClick={handleLinkClick}> Realme</Link></li>
+          <li><Link to={`/search?brand=Oneplus`} onClick={handleLinkClick}> Oneplus</Link></li>
+          <li><Link to={`/search?brand=Honor`} onClick={handleLinkClick}> Honor</Link></li>
+          <li><Link to={`/search?brand=Iqoo`} onClick={handleLinkClick}> Iqoo</Link></li>
+        </ul></div></div>
     <div className="Tablets"> <a href="#"> Tablets <span className="tablets"><b>&gt;</b></span></a>
       <div className="tabletlist"><p>Tablets</p>
         <ul>
-          <Link to={`/search?brand=Apple Ipad`} onClick={handleLinkClick}>Apple Ipad</Link>
-          <Link to={`/search?brand=Samsung tab`} onClick={handleLinkClick}>Samsung Tablet</Link>
-          <Link to={`/search?brand=Mi tab`} onClick={handleLinkClick}>Xiaomi Tablet</Link>
-          <Link to={`/search?brand=Oppo tab`} onClick={handleLinkClick}>Oppo Tablet</Link>
-          <Link to={`/search?brand=Realme tab`} onClick={handleLinkClick}>Realme Tablet</Link>
-          <Link to={`/search?brand=Oneplus tab`} onClick={handleLinkClick}>Oneplus Tablet</Link>
-          <Link to={`/search?brand=Honor tab`} onClick={handleLinkClick}>Honor Tablet</Link>
+          <li><a href="#"> Apple Tablet</a></li>
+          <li> <a href="#">Samsung Tablet</a></li>
+          <li> <a href="#">Xiaomi Tablet</a></li>
+          <li> <a href="#">Oppo Tablet</a></li>
+          <li> <a href="#">Realme Tablet</a></li>
+          <li> <a href="#">Oneplus Tablet</a></li>
+          <li> <a href="#">Honor Tablet</a></li>
         </ul></div></div>
     <div className="Headphone"> <a href="#">Headphone & Earbuds <span className="headphone"><b>&gt;</b></span></a>
       <div className="headphonelist"><p> Headphone & Earbuds</p>

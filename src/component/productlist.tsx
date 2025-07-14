@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation  } from "react-router-dom";
 import { useCart } from "../component/CartContext";
-import { useLocation } from "react-router-dom";
 import "./productlist.css";
 
 interface ProductListProps {
@@ -18,9 +17,11 @@ interface Product {
   Memory: string;
   Storage: string;
   Rating: number;
+  image?: string; // Optional, if available 
 }
 
 const BRANDS = ["Apple", "Samsung", "Realme", "Xiaomi"];
+
 const PRICE_RANGES = [
   { label: "Below ₹10,000", min: 0, max: 10000 },
   { label: "₹10,000 - ₹20,000", min: 10000, max: 20000 },
@@ -45,13 +46,12 @@ const ProductList = ({ searchQuery }: ProductListProps) => {
   const [selectedRam, setSelectedRam] = useState("");
 
   const [isFilterOpen, setIsFilterOpen] = useState(window.innerWidth >= 900);
-const [sortBy, setSortBy] = useState<string>("");
+  const [sortBy, setSortBy] = useState<string>("");
   const [order, setOrder] = useState<"asc" | "desc">("asc");
 
-const location = useLocation();
-const params = new URLSearchParams(location.search);
-const brandFromQuery = params.get("brand"); // e.g. "Samsung"
-
+  const location = useLocation();
+  const params = new URLSearchParams(location.search);
+  const brandFromQuery = params.get("brand")
   useEffect(() => {
     const handleResize = () => setIsFilterOpen(window.innerWidth >= 900);
     window.addEventListener("resize", handleResize);
@@ -59,11 +59,11 @@ const brandFromQuery = params.get("brand"); // e.g. "Samsung"
   }, []);
 
   useEffect(() => {
-  if (brandFromQuery) {
-    setSelectedBrand(brandFromQuery); // or filter frontend list
-  }
-}, [brandFromQuery]);   // Fetch products based on category from URL params
-
+  if(brandFromQuery) {
+    setSelectedBrand(brandFromQuery);
+    }
+}, [brandFromQuery]);  // Fetch products based on brand from URL params
+ 
 // Reset page to 1 when filters change
   useEffect(() => {
     setPage(1);
@@ -75,23 +75,17 @@ const brandFromQuery = params.get("brand"); // e.g. "Samsung"
       setLoading(true);
 
       const params = new URLSearchParams();
-      // NOTE: Your backend expects 'brand', not 'keyword'
-      if (searchQuery) params.append("brand", searchQuery);
+      if (searchQuery) params.append("keyword", searchQuery);
       if (selectedBrand) params.append("brand", selectedBrand);
       if (selectedStorage) params.append("storage", selectedStorage);
       if (selectedRam) params.append("memory", selectedRam);
-      if (selectedPrice !== -1) {
-      params.append("min_price", PRICE_RANGES[selectedPrice].min.toString());
-      params.append("max_price", PRICE_RANGES[selectedPrice].max.toString());
-    }
       params.append("page", String(page));
       params.append("limit", "20");
 
       try {
-        const res = await fetch(`/search?${params.toString()}`);
+        const res = await fetch(`/api/search?${params.toString()}`);
         const data = await res.json();
-        // Defensive: handle both array and object response
-        let filtered: Product[] = Array.isArray(data) ? data : (Array.isArray(data.products) ? data.products : []);
+        let filtered = data.products;
 
         filtered = filtered.filter((p: Product) => {
           const priceMatch =
@@ -103,16 +97,16 @@ const brandFromQuery = params.get("brand"); // e.g. "Samsung"
           const ramMatch = !selectedRam || p.Memory === selectedRam;
           return priceMatch && storageMatch && ramMatch;
         });
-        
-         // Sorting logic
+
+        // Sorting logic
         if (sortBy === "price") {
-          filtered = filtered.sort((a: Product, b: Product) =>
+          filtered = filtered.sort((a: { [x: string]: number; }, b: { [x: string]: number; }) =>
             order === "asc"
               ? a["Selling Price"] - b["Selling Price"]
               : b["Selling Price"] - a["Selling Price"]
           );
         } else if (sortBy === "rating") {
-          filtered = filtered.sort((a: Product, b: Product) =>
+          filtered = filtered.sort((a: { Rating: number; }, b: { Rating: number; }) =>
             order === "asc"
               ? a.Rating - b.Rating
               : b.Rating - a.Rating
@@ -120,7 +114,7 @@ const brandFromQuery = params.get("brand"); // e.g. "Samsung"
         }
 
         setProducts(filtered);
-        setTotal(filtered.length); // Since backend doesn't return total
+        setTotal(data.total);
       } catch (err) {
         console.error("Error loading products:", err);
         setProducts([]);
@@ -131,10 +125,10 @@ const brandFromQuery = params.get("brand"); // e.g. "Samsung"
     };
 
     fetchProducts();
-  }, [searchQuery, selectedBrand, selectedPrice, selectedStorage, selectedRam, page]);
+  }, [searchQuery, selectedBrand, selectedPrice, selectedStorage, selectedRam, page, sortBy, order]);
 
   return (<>
-    <div className="sort" style={{ display: "flex", gap: 8 }}>
+    <div className="sort sort-flex-gap">
           <label>
             Sort:
             <select value={sortBy} onChange={e => setSortBy(e.target.value)}>
@@ -146,21 +140,23 @@ const brandFromQuery = params.get("brand"); // e.g. "Samsung"
           <label>
             Order:
             <select value={order} onChange={e => setOrder(e.target.value as "asc" | "desc") }>
-              <option value="asc">Ascending</option>
-              <option value="desc">Descending</option>
+              <option value="asc">Asc</option>
+              <option value="desc">Desc</option>
             </select>
           </label>
         </div>
-    <div className="productlist-wrapper" style={{ display: "flex" }}>
-      <button
-        className="filter-toggle-btn"
-        onClick={() => setIsFilterOpen(prev => !prev)}
-      >
-        {isFilterOpen ? "Filters" : "Filters"}
-      </button>
+    <div className="productlist-wrapper productlist-flex">
+      <div className="productlist-filter-btns">
+        <button
+          className="filter-toggle-btn"
+          onClick={() => setIsFilterOpen(prev => !prev)}
+        >
+          {isFilterOpen ? "Filters" : "Filters"}
+        </button>
+      </div>
 
       {isFilterOpen && (
-        <aside className="filter-panel" style={{ width: 220, padding: 16 }}>
+        <aside className="filter-panel filter-panel-custom">
           <h4>Filter By</h4>
 
           <div>
@@ -193,7 +189,7 @@ const brandFromQuery = params.get("brand"); // e.g. "Samsung"
             </label>
           </div>
 
-          <div style={{ marginTop: 12 }}>
+          <div className="filter-margin-top">
             <strong>Price</strong>
             {PRICE_RANGES.map((range, idx) => (
               <label key={range.label}>
@@ -217,7 +213,7 @@ const brandFromQuery = params.get("brand"); // e.g. "Samsung"
             </label>
           </div>
 
-          <div style={{ marginTop: 12 }}>
+          <div className="filter-margin-top">
             <strong>Storage</strong>
             {STORAGES.map((s) => (
               <label key={s}>
@@ -241,7 +237,7 @@ const brandFromQuery = params.get("brand"); // e.g. "Samsung"
             </label>
           </div>
 
-          <div style={{ marginTop: 12 }}>
+          <div className="filter-margin-top">
             <strong>RAM</strong>
             {RAMS.map((r) => (
               <label key={r}>
@@ -267,7 +263,7 @@ const brandFromQuery = params.get("brand"); // e.g. "Samsung"
         </aside>
       )}
 
-      <div className="productlist-container" style={{ flex: 1 }}>
+      <div className="productlist-container productlist-flex1">
         {loading ? (
           <div className="producterror"><span>⏳ Loading Product...</span></div>
         ) : products.length === 0 ? (
@@ -279,19 +275,27 @@ const brandFromQuery = params.get("brand"); // e.g. "Samsung"
                 <div
                   className="product-item"
                   onClick={() => navigate(`/product/${product._id}`)}
-                  style={{ cursor: "pointer" }}
-                >
-                  {product.Brand} {product.Model} {product.Color} <br />
-                  {product.Memory} {product.Storage} <br />
-                  ₹{product["Selling Price"]}{" "}
-                  <del>₹{product["Original Price"]}</del> <br />
-                  Rating: {product.Rating}
-                </div>
+                ><div className="items-details">
+                  <span className="product-brand">{product.Brand}</span> <span className="product-model">{product.Model}</span> <span className="product-color">{product.Color}</span> <br />
+                  <span className="product-memory">{product.Memory}</span> <span className="product-storage">{product.Storage}</span> <br />
+                  <span className="product-price">₹{product["Selling Price"]}</span>{" "}
+                  <del className="product-original-price">₹{product["Original Price"]}</del> <br />
+                  <span className="product-rating">Rating: {product.Rating}</span>
+               </div> </div>
                 <button
                   className="add-to-cart"
                   onClick={() => {
                     console.log("Adding to cart:", product._id);
-                    addToCart(product._id, 1);
+                    addToCart(product._id, 1, {
+                      brand: product.Brand,
+                      model: product.Model,
+                      color: product.Color,
+                      memory: product.Memory,
+                      storage: product.Storage, 
+                      price: product["Selling Price"],
+                      image: product.image, // if available
+                      //description: product.description // if available
+                    });
                   }}
                 >
                   Add to Cart
@@ -303,17 +307,17 @@ const brandFromQuery = params.get("brand"); // e.g. "Samsung"
 
         {/* Pagination */}
         {products.length > 0 && (
-          <div style={{ marginTop: "1rem", textAlign: "center" }}>
+          <div className="pagination-controls">
             <button disabled={page <= 1} onClick={() => setPage(page - 1)}>
               ⬅️ Prev
             </button>
-            <span style={{ margin: "0 1rem" }}>Page {page}</span>
+            <span className="pagination-page">Page {page}</span>
             <button onClick={() => setPage(page + 1)}>Next ➡️</button>
           </div>
         )}
       </div>
-    </div>\
-  </>
+    </div>
+    </>
   );
 };
 

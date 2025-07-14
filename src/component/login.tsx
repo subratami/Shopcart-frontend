@@ -1,9 +1,9 @@
 import { useState, type ChangeEvent, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import './login.css';
 import { useCart } from "../component/CartContext";
 import { toast } from "react-toastify";
 
-import './login.css';
 
 interface LoginForm {
   email: string;
@@ -12,7 +12,7 @@ interface LoginForm {
 
 const Login = () => {
   const navigate = useNavigate();
-  const { refreshCart } = useCart();
+  const { fetchCart } = useCart();
   const [formData, setFormData] = useState<LoginForm>({ email: '', password: '' });
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -26,7 +26,7 @@ const Login = () => {
     e.preventDefault();
 
     try {
-      const res = await fetch('https://shopping-site-api-z8gg.onrender.com/login', {
+      const res = await fetch('/api/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
@@ -39,12 +39,14 @@ const Login = () => {
   localStorage.setItem("userName", data.name); // Save user name if available
   localStorage.setItem("access_token", data.access_token); // Save access token
   localStorage.setItem("refresh_token", data.refresh_token); // Save refresh token
-  await refreshCart();
+  
+  await fetchCart();
   toast.success("Login successful!");
+
   navigate('/dashboard');
 }
        else {
-        toast.error(data.detail || "Login failed");
+        alert(data.detail || "Login failed");
       }
     } catch (err) {
       console.error("Login error:", err);
@@ -55,7 +57,7 @@ const Login = () => {
   return (
     <div className="login-container">
       <div className="auth-form">
-        <p style={{ padding: '10px' }}>
+        <p className="login-signup-p">
           New User? <Link to="/signup">Sign Up</Link>
         </p>
         <h2>Log In</h2>

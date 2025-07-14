@@ -1,88 +1,146 @@
-import React from "react";
-import { useCart, type CartItem } from "./CartContext";
+import React, { useState } from "react";
+import { useCart } from "../component/CartContext";
+import { convertDriveLinkToEmbed } from "../utils/imageHelpers";
 import "./cart.css"
 
+
 const Cart: React.FC = () => {
-  const { cart, loading, error, removeFromCart, updateCartItem, clearCart, checkout } = useCart();
+  const {
+    cart,
+    loading,
+    updateCartItem,
+    removeFromCart,
+    applyCoupon,
+    checkout,
+  } = useCart();
+
+  const [coupon, setCoupon] = useState<string>("");
+  const [checkoutMsg, setCheckoutMsg] = useState<string>("");
+  const [processing, setProcessing] = useState<boolean>(false);
 
   if (loading) return <div className='carterror'><span>⏳ Loading cart...</span></div>;
-  if (error) return <div className='carterror' style={{ color: "red" }}>{error}</div>;
-  if (!cart.length) return <div className="carterror">😕 Your cart is empty.<br/> &nbsp;Refresh or Add 😕</div>
-  
-  const handleQuantityChange = (id: string, newQuantity: number) => {
-    if (newQuantity < 1) return;
-    updateCartItem(id, newQuantity);
+  if (!cart.items.length) return <div className="carterror">😕 Your cart is empty. ADD<br/> &nbsp;Refresh or Login Again 😕</div>;
+
+  const handleQuantityChange = (product_id: string, quantity: number) => {
+    if (quantity < 1) return;
+    updateCartItem(product_id, quantity);
   };
 
-  return (
-    <div className="cart-container">
+  const handleRemove = (product_id: string) => {
+    removeFromCart(product_id);
+  };
+
+  const handleApplyCoupon = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (coupon.trim()) {
+      await applyCoupon(coupon.trim());
+      setCoupon("");
+    }
+  };
+
+  const handleCheckout = async () => {
+    try {
+      setProcessing(true);
+      const res = await checkout();
+      setCheckoutMsg(res.message);
+    } catch {
+      setCheckoutMsg("Checkout failed.");
+    } finally {
+      setProcessing(false);
+    }
+  };
+
+  return (<>
+    
     <div className="cartlist">
-      <h2>Your Cart</h2>
+      <div className="cartheader"><h2>Your Cart</h2>
       <ul className="cart-ul-reset">
-        {cart.map((item: CartItem) => {
-          const id = item.product_id || item._id; // <-- Add this line
-          return (
-            <li key={id} className="cart-li-reset">{/*style={{ marginBottom: "0.5em" }} */}
-              <div className="product-photo"> {/* style={{display: "block", flexDirection: "column"}} */}
-                <img src="#" alt="Product" /> </div>
-                <div className="cart-description">
-                  <div className="cart-item-name">
-                <strong>
-                  {item.Brand ? item.Brand : ""}&nbsp;&nbsp;{item.Model ? item.Model : ""}&nbsp;&nbsp;{item.Color ? item.Color: ""}
-                </strong>
-                <br />
-                {item.Memory ? item.Memory : ""}&nbsp;&nbsp;{item.Storage ? item.Storage : ""}
-                <br/>
-                </div>
-                 <span className="cart-qty-btn"> 
-                  <button className="cart-qty-btn-minus"
-                    onClick={() => handleQuantityChange(id, item.quantity - 1)}>
-                    -
-                  </button>
-                  <input className="cart-qty-input"
-                    type="number"
-                    min="1"
-                    value={item.quantity}
-                    onChange={(e) =>
-                      updateCartItem(id, parseInt(e.target.value)) 
-                    } />
-                  <button className="cart-qty-btn-plus"
-                    onClick={() => handleQuantityChange(id, item.quantity + 1)}>
-                    +
-                  </button><br/>
-                
-                  <button className="cart-delete-btn"
-                  onClick={() => removeFromCart(id)}
-                >
-                  Delete
-                </button>
-                </span>
-                </div>
-                <div>
-                <strong>
-                {item["Selling Price"] ? <>₹{item["Selling Price"]}</> : null}
-               </strong>
-              </div>
-            </li>
-          );
-        })}
+        {cart.items.map((item) => (
+          <li key={item.product_id} className="cart-li-reset">
+            <div className="product-photo"><img src={convertDriveLinkToEmbed(item.image)} alt="error" /> </div>
+            <div className="cart-description">
+            <span className="cartitem-name">
+              <strong>
+                {item.brand || ""} {item.model || ""} {item.color || ""}
+              </strong></span>
+             <span className="cartitem-name"> {item.memory || ""} {item.storage || ""}<br/>
+            ₹{item.price}&nbsp;{" "}</span>
+            <div className="cart-qty">
+            <div className="cart-qty-controls">
+            <button
+             onClick={() => handleQuantityChange(item.product_id, item.quantity - 1)}
+      className="cart-qty-btn cart-qty-btn-minus"
+            >
+              -
+            </button>
+            <input
+              type="number"
+              min="1"
+              value={item.quantity}
+              onChange={(e) =>
+                handleQuantityChange(item.product_id, parseInt(e.target.value))
+              }
+              className="cart-qty-input"
+            />
+            <button
+      onClick={() => handleQuantityChange(item.product_id, item.quantity + 1)}
+      className="cart-qty-btn cart-qty-btn-plus"
+    >
+      +
+    </button>
+        </div>
+            <button
+                className="cart-remove-btn"
+                onClick={() => handleRemove(item.product_id)}
+              >
+                Remove
+              </button> </div> </div>
+            <span className="subtotal"><strong> ₹{item.subtotal} </strong> </span>
+            
+          </li>
+        ))}
       </ul>
-      <div  className="subtotal">
-  Subtotal: ₹
-  {cart.reduce(
-    (sum, item) =>
-      sum + (item["Selling Price"] ? item["Selling Price"] * item.quantity : 0),
-    0
-  )}
-</div>
-      <div className="cart-bottom">
-      <button className="cart-clear-btn" onClick={clearCart} style={{ marginRight: "1em" }}>
-        Clear Cart
+      </div>
+        <div className="cartbottom">
+      <form onSubmit={handleApplyCoupon} className="cart-coupon-form">
+        <input
+          type="text"
+          placeholder="Coupon code"
+          value={coupon}
+          onChange={(e) => setCoupon(e.target.value)}
+          className="cart-coupon-input"
+        />
+        <button type="submit" className="cart-coupon-btn">Apply Coupon</button>
+        {cart.coupon && (
+          <div className="cart-coupon-applied">
+            Applied coupon: <strong>{cart.coupon}</strong>
+          </div>
+        )}
+      </form>
+
+      <hr className="cart-hr-margins" />
+
+      <div className="cart-total-block">
+        <div>Discount: ₹{cart.discount_total}</div>
+        <div className="cart-final-total">
+          <strong>Total: ₹{cart.final_total}</strong>
+        </div>
+      </div>
+
+      <button
+        onClick={handleCheckout}
+        className="cart-checkout-btn"
+        disabled={processing}
+      >
+        {processing ? "Processing..." : "Checkout"}
       </button>
-      <button className="cart-checkout-btn" onClick={checkout}>Checkout</button>
+
+      {checkoutMsg && (
+        <div className="cart-checkout-msg">{checkoutMsg}</div>
+      )}
       </div>
     </div>
-    </div>
+    </>
   );
 };
 

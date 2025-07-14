@@ -51,7 +51,7 @@ function Footer() {
      <div className="footer2">
       <CollapsibleSection title="Contact Us">
         <ul>
-          <li style={{fontSize:"1rem", fontWeight:"bold"}}>Shopcart</li>
+          <li className="footer-shopcart-bold">Shopcart</li>
           <li>Customer Supports: 9834297810</li>
           <li>Hilakandi Road, Silchar 788002</li>
           <li>Shopcart@gmail.com</li>

@@ -26,10 +26,18 @@ border-radius: 25px;
 .footer2{
   display: none;
 }
+.socialmedia{
+  display: none;
+}
 .socialmedia li img{
   align-items: center;
 }
-
+@media screen and (max-width: 850px) {
+  .socialmedia{
+    display: block;
+  }
+  
+}
 @media screen and (max-width: 768px){
   .footer-data {
  padding: 10px;
@@ -74,4 +82,8 @@ footer ul li{
     color: white;
     gap: 5px;
   }
+}
+.footer-shopcart-bold {
+  font-size: 1rem;
+  font-weight: bold;
 }

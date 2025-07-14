@@ -35,7 +35,7 @@ const Signin = () => {
     }
 
     try {
-      const res = await fetch('https://shopping-site-api-z8gg.onrender.com/signup', {
+      const res = await fetch('/api/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -47,14 +47,20 @@ const Signin = () => {
 
       const data = await res.json();
       if (res.ok) {
-        toast.success('Signup successful!');
+        //alert('Signup successful!');
+        toast.success("Signup successful!");
+
         navigate('/dashboard');
       } else {
-        toast.error(data.detail || 'Signup failed');
+        //alert(data.detail || 'Signup failed');
+        toast.info("Signup failed!");
+
       }
     } catch (error) {
       console.error('Signup error:', error);
-      toast.error('Server error. Please try again.');
+      //alert('Server error. Please try again.');
+      toast.error("Server error. Please try again.");
+
     }
   };
 

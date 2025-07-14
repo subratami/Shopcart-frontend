@@ -4,7 +4,7 @@ import { authFetch } from '../utils/authFetch';
 const Dashboard = () => {
   useEffect(() => {
     const fetchProtectedData = async () => {
-      const res = await authFetch('https://shopping-site-api-z8gg.onrender.com/protected');
+      const res = await authFetch('http://127.0.0.1:8000/protected');
       const data = await res.json();
       console.log("Protected response:", data);
       // You can also store this in state to show in the UI
