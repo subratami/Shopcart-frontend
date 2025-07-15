@@ -74,12 +74,12 @@ const Cart: React.FC = () => {
               -
             </button>
             <input
-              type="number"
+              type="text"
               min="1"
               value={item.quantity}
-              onChange={(e) =>
-                handleQuantityChange(item.product_id, parseInt(e.target.value))
-              }
+              //onChange={(e) =>
+               // handleQuantityChange(item.product_id, parseInt(e.target.value))
+             // }
               className="cart-qty-input"
             />
             <button

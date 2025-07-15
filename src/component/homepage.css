@@ -59,7 +59,7 @@ height: 60vh;
 .homepage{
   position: relative;
   top: 6%; 
-  z-index: -1;
+  /*z-index: -1;*/
 }
 }
 @media  screen and (max-width: 750px) {

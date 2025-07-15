@@ -1,7 +1,7 @@
 import facebookLogo from "./facebook logo.png";
 import instagramLogo from "./instagram logo.png";
 import twitterXLogo from "./twitterX logo.png";
-import navLogo from "./nav logo.png";
+import navLogo from "./nav logo3.png";
 import person from "./person.png";
 import wishlist from "./wishlist.png";
 import { useCart } from "../component/CartContext";
