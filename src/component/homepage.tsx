@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { useTheme } from "./themeContext";
 import banner from "./pexels-fauxels-3183132.jpg";
 import Advertisment from "./w69uo7lk.png";
 import './homepage.css';
@@ -9,8 +10,9 @@ import clothing from "./cloths.png";
 import { Link } from "react-router-dom";
 
 function Homepage() {
+  const { darkMode } = useTheme();
   return (
-    <div className="homepage">
+    <div className={`homepage ${darkMode ? "dark" : "light"}`}>
       <motion.img
         className="banner-img"
         src={banner}

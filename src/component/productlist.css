@@ -83,12 +83,12 @@ float: right;
 
 .product-list .product-item {
   background-color: #fff;
-  border: 1px solid #eee;
+  border: 3px solid #ffffff;
   border-radius: 12px;
   font-size: 15px;
   padding: 24px 16px 16px 16px;
   min-height: 220px;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.07);
+  box-shadow: var(--box-shadow);
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -135,18 +135,6 @@ float: right;
 }
 .filter-toggle-btn {
   display: none; 
-  position: relative;
-  top: 12%; 
-  left: 16px;
- 
-  padding: 8px 16px;
-  background: #ba2525;
-  color: #fff;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-weight: bold;
-
 }
 .producterror{
     min-height: 100vh;
@@ -195,17 +183,17 @@ float: right;
 
 @media (max-width: 900px) {
   .filter-panel {
-    position: absolute !important;
-    top: 28%;
+    position: absolute;
+    top: 22%;
     left: 1%;
     z-index: 1001;
-    width: 80vw !important;
+    width: 80vw;
     max-width: 320px;
     height: 60vh;
     overflow-y: auto;
     box-shadow: 2px 0 16px rgba(0,0,0,0.18);
     background: #fff;
-    padding-top: 32px !important;
+    padding-top: 32px;
     transition: transform 0.3s;
   }
   .filter-overlay {
@@ -222,8 +210,18 @@ float: right;
     .productlist-container{
       width: 97%;
     }
-    .filter-toggle-btn {
-    display: block; 
+  .filter-toggle-btn {
+  display: block; 
+  position: absolute;
+  top: 110px; 
+  left: 16px;
+  padding: 8px 16px;
+  background: #ba2525;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
    }
 }
 
@@ -240,8 +238,11 @@ float: right;
   .sort{
  position: absolute; 
  right: 0%;
- top: 13%;
+ top: 75px;
 }
+.filter-toggle-btn{
+    top: 0%;
+  }
   .filter-panel {
     top: 3%;
     font-size: 14px;
@@ -259,7 +260,8 @@ float: right;
   .productlist-wrapper{
     margin-top: 0px;
     position: relative;
-    top: 6%;
+    top: 50px;
+    padding-top: 10px;
   } 
   .productlist-container{
     margin-bottom: 40px;
@@ -273,18 +275,19 @@ float: right;
 
 }
   
-@media (max-width: 600px) {
+@media (max-width: 650px) {
   .product-list {
     grid-template-columns: 1fr;
     gap: 16px;
     width: 98%;
   }
-   .productlist-wrapper {
+  .productlist-wrapper {
     position: relative;
-    top: 2.5%;
+    top: 70px;
     margin-top: 0px;
-    padding-top: 0px;
+    padding-top: 20px;
   }
+
   .filter-panel {
     top: 1.5%;
     }

@@ -14,6 +14,7 @@ import   { CartProvider } from "./component/CartContext";
 import CartPage from './component/cart';
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { ThemeProvider } from "./component/themeContext";
 function App() {
   const [searchQuery, setSearchQuery] = useState("");
     const [toastPosition, setToastPosition] = useState<"top-right" | "bottom-center">("top-right");
@@ -32,6 +33,7 @@ function App() {
   }, []);
   return (
     <> 
+<ThemeProvider>
 <CartProvider>
     <Router basename="/Shopcart-shopping-Website-">
     <Header onSearch={setSearchQuery}/>
@@ -47,6 +49,7 @@ function App() {
     <Footer />
     </Router>
 </CartProvider>
+</ThemeProvider>
 <ToastContainer position={toastPosition} autoClose={2000} />
 </>
   );

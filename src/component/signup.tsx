@@ -53,7 +53,7 @@ const Signin = () => {
         navigate('/dashboard');
       } else {
         //alert(data.detail || 'Signup failed');
-        toast.info("Signup failed!");
+        toast.info(data.detail || "Signup failed!");
 
       }
     } catch (error) {
@@ -115,7 +115,7 @@ const Signin = () => {
           <button type="submit">SIGN UP</button>
 
           <div style={{ display: 'flex', alignItems: 'center', marginTop: '10px' }}>
-            <input type="checkbox" id="terms" required />
+            <input type="checkbox" id="terms" required style={{ width: "20px"}}/>
             <label htmlFor="terms" style={{ marginLeft: '10px' }}>
               I agree to the <a href="#">Terms & Conditions</a>
             </label>

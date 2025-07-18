@@ -3,10 +3,18 @@ import './Footer.css'
 import facebookLogo from "./facebook logo.png"
 import instagramLogo from "./instagram logo.png"
 import twitterXLogo from "./twitterX logo.png"
+import { useTheme } from "./themeContext";
+import playstoredark from "./playstoredark.png"
+import playstorelight from "./playstorelight.png"
+import appstoredark from "./appstoredark.png"
+import appstorelight from "./appstorelight.png"
 function Footer() {
+  const { darkMode } = useTheme();
+  const playstore = darkMode ? playstorelight: playstoredark;
+  const appstore = darkMode ? appstorelight: appstoredark;
    return(
    <> 
-<footer className="footer">
+<footer className={`footer ${darkMode ? "dark" : "light"}`}>
       <div className="footer-data">
         <div>
           <h2>Shopcart</h2>
@@ -44,8 +52,8 @@ function Footer() {
       </ul>
         <div className='download-app'>
           <h3>Download App</h3>
-          <button>Get it now on Google Play</button>
-          <button>Get it now on App Store</button>
+          <img src={playstore} alt="playstore" />
+          <img src={appstore} alt="appstore" />
         </div>
      </div>
      <div className="footer2">
@@ -87,8 +95,8 @@ function Footer() {
       </ul>
       <div className='download-app'>
           <h3>Download App</h3>
-          <button>Get it now on Google Play</button>
-          <button>Get it now on App Store</button>
+          <img src={playstore} alt="playstore" />
+          <img src={appstore} alt="appstore" />
         </div>
     </div>
 </footer>

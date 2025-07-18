@@ -9,6 +9,30 @@ body {
   flex-direction: column;
   background-color: #faebd76e;
 }
+/* index.css or App.css */
+:root {
+  --bg-color: rgba(255, 255, 255, 0.833);
+  --bg-color2: black;
+  --box-shadow: rgba(98, 102, 102, 0.537) 0px 2px 20px 0px;
+  --text-color: #000000;
+  --text-color2: white;
+  --card-color: #f7f7f7;
+}
+
+body.dark {
+  --bg-color: #121212;
+  --bg-color2: white;  
+  --box-shadow: rgba(156, 222, 222, 0.334) 0px 2px 20px 0px;
+  --text-color: #f5f5f5;
+  --text-color2: black;
+  --card-color: #1f1f1f;
+}
+
+body {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
 /*.root{
   min-height: 100vh;
 }*/

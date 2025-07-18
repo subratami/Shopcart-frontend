@@ -1,18 +1,26 @@
 import facebookLogo from "./facebook logo.png";
 import instagramLogo from "./instagram logo.png";
 import twitterXLogo from "./twitterX logo.png";
-import navLogo from "./nav logo3.png";
-import person from "./person.png";
-import wishlist from "./wishlist.png";
+import navlogodark from "./nav logo2 .png";
+import navlogolight from "./nav logo3.png"
+import persondark from "./person.png";
+import personlight from "./person2.png";
+import wishlistdark from "./wishlist.png";
+import wishlistlight from "./wishlist2.png";
 import { useCart } from "../component/CartContext";
-import shoppingBag from "./shopping-bag.png";
+import shoppingBagdark from "./shopping-bag.png";
+import shoppingBaglight from "./shopping-bag2.png";
 import Electronics from "./pexels-fauxels-3183132.jpg";
 import {Link, useNavigate} from "react-router-dom";
 import { useEffect, useState } from "react";
 import { debounce } from "lodash";
 import menubar from "./menu-bar.png";
-import close from "./close.png"
+import close from "./close.png";
+import finddark from "./magnifying-glass.png";
+import findlight from "./magnifying-glass2.png";
 import { logoutUser } from "../utils/logout.ts";
+import { useTheme } from "./themeContext";
+import { MdDarkMode, MdLightMode } from "react-icons/md";
 
 //import Homepage from './homepage';
 //import Login from "./login";
@@ -26,8 +34,10 @@ const debouncedSearch = debounce((query: string, onSearch: (query: string) => vo
 }, 300); // 300ms delay
 
 function Header({ onSearch }: HeaderProps) {
-
+  const { darkMode, toggleDarkMode } = useTheme();
   const [userName, setUserName] = useState<string | null>(null);
+  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);  
 
   useEffect(() => {
     const name = localStorage.getItem("userName");
@@ -37,10 +47,32 @@ function Header({ onSearch }: HeaderProps) {
     const navigate = useNavigate();
     const { cart } = useCart(); // Access cart from CartContext
 
-    const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setSearch(e.target.value);
-        debouncedSearch(e.target.value, onSearch); // Pass search query to parent
-    };
+    const handleSearchChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const value = e.target.value;
+  setSearch(value);
+  debouncedSearch(value, onSearch);
+
+  if (value.trim().length > 0) {
+    try {
+      const response = await fetch(`http://127.0.0.1:8000/suggestions?q=${value}`);
+      const data: string[] = await response.json(); // 👈 TypeScript expects an array of strings
+      setSuggestions(data);
+      setShowSuggestions(true);
+    } catch (error) {
+      console.error("Error fetching suggestions:", error);
+      setSuggestions([]);
+      setShowSuggestions(false);
+    }
+  } else {
+    setSuggestions([]);
+    setShowSuggestions(false);
+  }
+};
+    const handleSuggestionClick = (suggestion: string): void => {
+    setSearch(suggestion);
+    setShowSuggestions(false);
+    navigate("/search");
+  };
       const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === "Enter") {
             navigate("/search"); // Navigate to search results page
@@ -66,18 +98,11 @@ function Header({ onSearch }: HeaderProps) {
       setActiveSubMenu(null); // close inner submenu
     };
 
-    // Hide dropdown-component when clicking outside or any link/button inside (on small screens)
-   /* useEffect(() => {
-      if (window.innerWidth > 900) return;
-      const handleAnyClick = () => {
-        // Only run on small screens
-        setIsOpen(false);
-        setActiveMenu(null);
-        setActiveSubMenu(null);
-      };
-      document.addEventListener("click", handleAnyClick);
-      return () => document.removeEventListener("click", handleAnyClick);
-    }, []);*/
+    const navLogo = darkMode ? navlogolight: navlogodark;
+    const person = darkMode ? personlight: persondark;
+    const wishlist = darkMode ? wishlistlight: wishlistdark;
+    const shoppingBag = darkMode ? shoppingBaglight: shoppingBagdark;
+    const find = darkMode ? findlight: finddark;
     return (
         <>
         <header>
@@ -95,17 +120,37 @@ function Header({ onSearch }: HeaderProps) {
     </header>
   <nav>
     <Link to='/'><img className="logo" src={navLogo} alt="Shopcart Logo"/></Link>
-    <input  type="text" className="searchbar" placeholder="Search for products, brands and more" value={search} onChange={handleSearchChange} onKeyDown={handleKeyPress} // Handle Enter key press
-                />
+    <div className="search-wrapper">
+    <div className="input-wrapper">
+          <input
+            type="text"
+            className="searchbar"
+            placeholder="Search for products, brands and more"
+            value={search}
+            onChange={handleSearchChange}
+            onKeyDown={handleKeyPress}
+          />
+          {showSuggestions && (
+            <ul className="suggestions-list">
+              {suggestions.map((item: string, index: number) => (
+                <li key={index} onClick={() => handleSuggestionClick(item)}>
+                  {item}
+                </li>
+              ))}
+            </ul>
+          )}</div>
+          <button className="searchbtn"> <img src={find} alt="not_load" /> </button>
+        </div>
     <ul className="list"> 
 <li className="person"><div className="dropdown">
    <div className="dropbtn"> <a href="#"><img src={person} alt="not_load"/>Account<div className="Account-blank"><div className="Acblack-blank"></div></div></a>
    </div>
 <div className="dropdown-content">
-{/*
-<p className="para1"><small>Signup/Login for best experience</small></p>
-*/}
-<span className="header-welcome">Welcome, {userName || "User"}!</span>
+{localStorage.getItem("isLoggedIn") === "false" ? (
+<p className="para1"><small>Signup/Login for best experience</small></p>)
+:
+(<span className="header-welcome">Welcome, {userName || "User"}!</span>)
+}
 {localStorage.getItem("isLoggedIn") === "true" ? (
   <div className="button">
     <button
@@ -145,6 +190,9 @@ function Header({ onSearch }: HeaderProps) {
 <li className="Wishlist"> <a href="#"><img src={wishlist} alt="not_load"/> Wishlist </a> </li>
 <li className="Shoppingbag"> <Link to="/cart"> <img src={shoppingBag} alt="not_load"/>Cart<span className="cart-count">{cart.items?.length ?? 0}</span></Link> </li>
 </ul>
+<button onClick={toggleDarkMode} className="theme-toggle-btn">
+        {darkMode ? <MdLightMode size={24} /> : <MdDarkMode size={24} />}
+      </button>
 </nav>
 <div className="second">
  <button className="toogle-btn" onClick={toogleMenu}>
@@ -154,7 +202,7 @@ function Header({ onSearch }: HeaderProps) {
   <button className="closebtn header-closebtn" onClick={handleLinkClick}> <img src={close} alt="close icon" className="header-closeimg"/> </button>
 <ul className="menu-list">
  {/* side Menu */}
- <li className="User header-user-li" style={{ padding:"1rem", textAlignLast: "end"}}>
+ <li className="User-header-user-li" style={{ padding:"1rem", textAlignLast: "end", display: "flex", justifyContent: "space-between"}}>
   {localStorage.getItem("isLoggedIn") === "true" ? (
   <button
       className="btnlink header-logout-btn-side"

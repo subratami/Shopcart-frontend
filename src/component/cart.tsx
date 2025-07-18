@@ -76,7 +76,7 @@ const Cart: React.FC = () => {
             <input
               type="text"
               min="1"
-              value={item.quantity}
+              value={item.quantity} readOnly
               //onChange={(e) =>
                // handleQuantityChange(item.product_id, parseInt(e.target.value))
              // }

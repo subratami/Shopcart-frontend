@@ -27,7 +27,8 @@
     border-radius: 8px;
     padding: 20px;
     /*height: 15vh;*/
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    box-shadow: var(--box-shadow);
+    color: #000000;
     display: flex;
     justify-content: space-between;
 }
@@ -41,11 +42,12 @@
     flex-direction: column;
     width: 200px;
     background-color: #ebd4d4;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.27);
+    box-shadow: var(--box-shadow);
     height: fit-content;
     border-radius: 8px;
     padding: 5px;
     margin-top: 47px;
+    color: #000000;
 }
 .carterror{
     min-height: 100vh;
