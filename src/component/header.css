@@ -68,18 +68,21 @@ nav{
     height: 30px;
     border-radius: 1.9rem;
 }*/
-nav .search-wrapper .searchbar{
-  width: 100%;
+nav .input-wrapper .searchbar{
+  width: 30%;
   height: 30px;
   border-radius: 15px;
   margin-right:30px;
+  position: absolute;
+  top: 38px;
 }
 .search-wrapper {
   width: 30%;
 }
 .suggestions-list {
-  position: absolute;
-  top: 100%;
+  position: relative;
+  top: 210px;
+  width: 100%;
   left: 0;
   right: 0;
   background-color: var(--card-color);
@@ -97,6 +100,7 @@ nav .search-wrapper .searchbar{
 }
 .suggestions-list li:hover {
   background-color: #eee;
+  color:rgb(72, 72, 5);
 }
 .searchbtn{
   display: block;
@@ -907,18 +911,22 @@ nav{
     display: none;
   }
   .searchbtn img{
+    height: 35px;
     display: block;
     cursor: pointer;
   }
   .search-wrapper:hover{
   .input-wrapper{
-    width: 95%;
+    width: 318%;
     height: 30px;
-    left: 2.4%;
-    top: 44px;
+    left: 2%;
+    top: 5.5px;
     display: block;
-
     }
+  }
+  .suggestions-list{
+    top: 70px;
+    width: 30%;
   }
   .dropbtn:hover .Account-blank{
   display: none; 
@@ -955,7 +963,7 @@ nav{
 .second .side-menu{
   display: block;
   position: fixed;
-  top: 11.5%;
+  top: 8.5%;
   left: -110%;
   width: 60%;
   height: fit-content;
@@ -969,6 +977,9 @@ nav{
 }
 .side-menu.open .closebtn{
 display: none;
+}
+.side-menu.close .closebtn{
+  display: none;
 }
 .menu-list {
   background-color: rgb(236, 232, 232);

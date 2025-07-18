@@ -140,8 +140,8 @@ const ProductList = ({ searchQuery }: ProductListProps) => {
           <label>
             Order:
             <select value={order} onChange={e => setOrder(e.target.value as "asc" | "desc") }>
-              <option value="asc">Asc</option>
-              <option value="desc">Desc</option>
+              <option value="asc">Ascending</option>
+              <option value="desc">Descending</option>
             </select>
           </label>
         </div>
